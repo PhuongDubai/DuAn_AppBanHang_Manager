@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ import com.example.duan_appbanhang.retrfit.ApiBanHang;
 import com.example.duan_appbanhang.retrfit.RetrofitClient;
 import com.example.duan_appbanhang.utils.Utils;
 import com.google.android.material.navigation.NavigationView;
+import com.nex3z.notificationbadge.NotificationBadge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     ApiBanHang apiBanHang;
     List<SanPhamMoi> mangSpMoi;
     SanPhamMoiAdapter spAdapter;
+    NotificationBadge badge;
+    FrameLayout frameLayout;
 
 
     @Override
@@ -145,9 +149,13 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toobbar_manhinhchinh);
         viewFlipper = findViewById(R.id.viewlipper);
         recyclerViewManHinhChinh = findViewById(R.id.recycleview);
+        badge = findViewById(R.id.menu_sl);
+        frameLayout = findViewById(R.id.framegiohang);
+
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerViewManHinhChinh.setLayoutManager(layoutManager);
         recyclerViewManHinhChinh.setHasFixedSize(true);
+
 
         listViewManHinhChinh = findViewById(R.id.listview_manhinhchinh);
         navigationView = findViewById(R.id.navigationview);
@@ -157,11 +165,33 @@ public class MainActivity extends AppCompatActivity {
         mangSpMoi = new ArrayList<>();
         if (Utils.manggiohang == null){
             Utils.manggiohang = new ArrayList<>();
+        }else {
+            int totalItem = 0;
+            for (int i = 0; i < Utils.manggiohang.size(); i++) {
+                totalItem = totalItem + Utils.manggiohang.get(i).getSoluong();
+            }
+            badge.setText(String.valueOf(totalItem));
         }
 
+        frameLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent giohang = new Intent(getApplicationContext(), GioHangActivity.class);
+                startActivity(giohang);
+            }
+        });
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        int totalItem = 0;
+        for (int i = 0; i < Utils.manggiohang.size(); i++) {
+            totalItem = totalItem + Utils.manggiohang.get(i).getSoluong();
+        }
+        badge.setText(String.valueOf(totalItem));
+    }
 
     private void ActionViewFlipper() {
         List<String> mangquangcao = new ArrayList<>();
