@@ -64,6 +64,7 @@ public class DienThoaiAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     if (!isLongClick){
                         // click
                         Intent intent = new Intent(context, ChiTietActivity.class);
+                        intent.putExtra("chitiet",sanPhamMoi);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
 

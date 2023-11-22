@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DuAn_AppBanHang</string>
+    <string name="_15_000_000_vnd">15,000,000 VND</string>
+    <string name="th_m_v_o_gi_h_ng">Thêm vào giỏ hàng</string>
 </resources>
