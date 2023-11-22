@@ -155,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
         // khoi tao list
         mangloaisp = new ArrayList<>();
         mangSpMoi = new ArrayList<>();
+        if (Utils.manggiohang == null){
+            Utils.manggiohang = new ArrayList<>();
+        }
 
 
     }
