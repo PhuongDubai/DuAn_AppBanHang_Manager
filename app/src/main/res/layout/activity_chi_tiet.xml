@@ -7,7 +7,7 @@
     tools:context=".activity.ChiTietActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toobbar"
+        android:id="@+id/toobbarchitiet"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
 
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/toobbar">
+        app:layout_constraintTop_toBottomOf="@id/toobbarchitiet">
 
         <ImageView
             android:id="@+id/imgchitiet"

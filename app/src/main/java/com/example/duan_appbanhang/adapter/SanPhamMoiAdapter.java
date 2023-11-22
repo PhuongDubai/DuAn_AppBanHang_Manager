@@ -42,15 +42,15 @@ public class SanPhamMoiAdapter extends RecyclerView.Adapter<SanPhamMoiAdapter.My
         SanPhamMoi sanPhamMoi = array.get(position);
         holder.txtten.setText(sanPhamMoi.getTensp());
         DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
-        holder.txtgia.setText("Giá: "+decimalFormat.format(Double.parseDouble(sanPhamMoi.getGiasp())) +" VND");
+        holder.txtgia.setText("Giá: " + decimalFormat.format(Double.parseDouble(sanPhamMoi.getGiasp())) + " VND");
         Glide.with(context).load(sanPhamMoi.getHinhanh()).into(holder.imghinhanh);
         holder.setItemClickListener(new ItemClickListener() {
             @Override
             public void onClick(View view, int pos, boolean isLongClick) {
-                if (!isLongClick){
+                if (!isLongClick) {
                     // click
                     Intent intent = new Intent(context, ChiTietActivity.class);
-                    intent.putExtra("chitiet",sanPhamMoi);
+                    intent.putExtra("chitiet", sanPhamMoi);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
 
@@ -86,7 +86,7 @@ public class SanPhamMoiAdapter extends RecyclerView.Adapter<SanPhamMoiAdapter.My
 
         @Override
         public void onClick(View view) {
-            itemClickListener.onClick(view,getAdapterPosition(),false);
+            itemClickListener.onClick(view, getAdapterPosition(), false);
         }
     }
 }

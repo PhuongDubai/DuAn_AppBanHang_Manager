@@ -61,17 +61,17 @@ public class DienThoaiAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             myViewHolder.setItemClickListener(new ItemClickListener() {
                 @Override
                 public void onClick(View view, int pos, boolean isLongClick) {
-                    if (!isLongClick){
+                    if (!isLongClick) {
                         // click
                         Intent intent = new Intent(context, ChiTietActivity.class);
-                        intent.putExtra("chitiet",sanPhamMoi);
+                        intent.putExtra("chitiet", sanPhamMoi);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
 
                     }
                 }
             });
-        }else {
+        } else {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
             loadingViewHolder.progressBar.setIndeterminate(true);
         }
@@ -79,7 +79,7 @@ public class DienThoaiAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        return array.get(position) == null ? VIEW_TYPE_LOADING:VIEW_TYPE_DATA;
+        return array.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_DATA;
     }
 
     @Override
@@ -99,7 +99,7 @@ public class DienThoaiAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tensp, giasp, mota;
         ImageView hinhanh;
-        private ItemClickListener itemClickListener ;
+        private ItemClickListener itemClickListener;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,7 +116,7 @@ public class DienThoaiAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         @Override
         public void onClick(View view) {
-            itemClickListener.onClick(view, getAdapterPosition(),false);
+            itemClickListener.onClick(view, getAdapterPosition(), false);
         }
     }
 
