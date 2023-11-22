@@ -1,5 +1,6 @@
 package com.example.duan_appbanhang.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Toast;
 
@@ -33,7 +35,9 @@ public class DienThoaiActivity extends AppCompatActivity {
     int loai;
     DienThoaiAdapter adapterDt;
     List<SanPhamMoi> sanPhamMoiList;
-
+    LinearLayoutManager linearLayoutManager;
+    Handler handler = new Handler();
+    boolean isloading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,19 +48,74 @@ public class DienThoaiActivity extends AppCompatActivity {
 
         AnhXa();
         ActionToolBar();
-        getData();
+        getData(page);
+        addEventLoad();
     }
 
-    private void getData() {
-        compositeDisposable.add(apiBanHang.getSanPham(page,loai)
+    private void addEventLoad() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (isloading == false) {
+                    if (linearLayoutManager.findLastCompletelyVisibleItemPosition() == sanPhamMoiList.size() - 1) {
+                        isloading = true;
+                        loadMore();
+                    }
+                }
+            }
+        });
+    }
+
+    private void loadMore() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                // add null
+                sanPhamMoiList.add(null);
+                adapterDt.notifyItemInserted(sanPhamMoiList.size() - 1);
+            }
+        });
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                sanPhamMoiList.remove(sanPhamMoiList.size() - 1);
+                adapterDt.notifyItemRemoved(sanPhamMoiList.size());
+                page = page + 1;
+                getData(page);
+                adapterDt.notifyDataSetChanged();
+                isloading = false;
+            }
+        }, 2000);
+    }
+
+    private void getData(int page) {
+        compositeDisposable.add(apiBanHang.getSanPham(page, loai)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         sanPhamMoiModel -> {
-                            if(sanPhamMoiModel.isSuccess()){
-                                sanPhamMoiList = sanPhamMoiModel.getResult();
-                                adapterDt = new DienThoaiAdapter(getApplicationContext(),sanPhamMoiList);
-                                recyclerView.setAdapter(adapterDt);
+                            if (sanPhamMoiModel.isSuccess()) {
+                                if (adapterDt == null) {
+                                    sanPhamMoiList = sanPhamMoiModel.getResult();
+                                    adapterDt = new DienThoaiAdapter(getApplicationContext(), sanPhamMoiList);
+                                    recyclerView.setAdapter(adapterDt);
+                                } else {
+                                    int vitri = sanPhamMoiList.size() - 1;
+                                    int soluongadd = sanPhamMoiModel.getResult().size();
+                                    for (int i = 0; i < soluongadd; i++) {
+                                        sanPhamMoiList.add(sanPhamMoiModel.getResult().get(i));
+                                    }
+                                    adapterDt.notifyItemRangeInserted(vitri, soluongadd);
+                                }
+                            } else {
+                                Toast.makeText(this, "hết sản phẩm", Toast.LENGTH_SHORT).show();
+                                isloading = true;
                             }
 
                         },
@@ -81,8 +140,8 @@ public class DienThoaiActivity extends AppCompatActivity {
     private void AnhXa() {
         toolbar = findViewById(R.id.toobbar);
         recyclerView = findViewById(R.id.recycleview_dt);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
         sanPhamMoiList = new ArrayList<>();
     }
