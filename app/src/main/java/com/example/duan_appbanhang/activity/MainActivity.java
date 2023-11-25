@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     SanPhamMoiAdapter spAdapter;
     NotificationBadge badge;
     FrameLayout frameLayout;
+    ImageView imgsearch;
 
 
     @Override
@@ -155,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewManHinhChinh = findViewById(R.id.recycleview);
         badge = findViewById(R.id.menu_sl);
         frameLayout = findViewById(R.id.framegiohang);
+        imgsearch = findViewById(R.id.imgsearch);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerViewManHinhChinh.setLayoutManager(layoutManager);
@@ -182,6 +184,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent giohang = new Intent(getApplicationContext(), GioHangActivity.class);
                 startActivity(giohang);
+            }
+        });
+        imgsearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                startActivity(intent);
             }
         });
 
