@@ -1,5 +1,6 @@
 package com.example.duan_appbanhang.retrfit;
 
+import com.example.duan_appbanhang.mode.DonHangModel;
 import com.example.duan_appbanhang.mode.LoaiSpModel;
 import com.example.duan_appbanhang.mode.SanPhamMoiModel;
 import com.example.duan_appbanhang.mode.UserModel;
@@ -53,6 +54,13 @@ public interface ApiBanHang {
           @Field("diachi") String diachi,
           @Field("soluong") int soluong,
           @Field("chitiet") String chitiet
+  );
+
+  @POST("xemdonhang.php")
+  @FormUrlEncoded
+  Observable<DonHangModel> xemDonHang(
+          @Field("iduser") int id
+
   );
 
 }
