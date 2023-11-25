@@ -108,6 +108,10 @@ public class MainActivity extends AppCompatActivity {
                         Intent donhang = new Intent(getApplicationContext(), XemDonActivity.class);
                         startActivity(donhang);
                         break;
+                    case 6:
+                        Intent dangxuat = new Intent(getApplicationContext(), DangNhapActivity.class);
+                        startActivity(dangxuat);
+                        break;
                 }
             }
         });

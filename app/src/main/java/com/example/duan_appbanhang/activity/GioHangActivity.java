@@ -41,6 +41,10 @@ public class GioHangActivity extends AppCompatActivity {
         initView();
         initControl();
         tinhTongTien();
+        if (Utils.mangmuahang!= null){
+            Utils.mangmuahang.clear();
+        }
+        tinhTongTien();
     }
 
     private void tinhTongTien() {

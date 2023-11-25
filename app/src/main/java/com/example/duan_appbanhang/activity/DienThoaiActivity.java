@@ -127,6 +127,7 @@ public class DienThoaiActivity extends AppCompatActivity {
     }
 
     private void ActionToolBar() {
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
