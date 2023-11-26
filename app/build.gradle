@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.duan_appbanhang'
+    namespace 'com.manager.duan_appbanhang'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.duan_appbanhang"
+        applicationId "com.manager.duan_appbanhang"
         minSdk 26
         targetSdk 33
         versionCode 1
@@ -25,6 +25,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildFeatures{
+        viewBinding true
+        dataBinding true
     }
 }
 
@@ -54,5 +58,8 @@ dependencies {
     implementation 'io.github.pilgr:paperdb:2.7.2'
     //gson
     implementation 'com.google.code.gson:gson:2.10.1'
+    //neumorphism
+    implementation 'com.github.fornewid:neumorphism:{latest_version}'
+    implementation 'com.github.fornewid:neumorphism:0.2.1'
 
 }

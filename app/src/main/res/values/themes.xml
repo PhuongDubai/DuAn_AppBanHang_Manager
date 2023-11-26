@@ -6,4 +6,13 @@
     </style>
 
     <style name="Theme.DuAn_AppBanHang" parent="Base.Theme.DuAn_AppBanHang" />
+
+    <style name="neumorphimcard">
+        <item name="neumorph_cornerFamily">rounded</item>
+        <item name="neumorph_cornerSize">12dp</item>
+
+
+    </style>
+
+
 </resources>
