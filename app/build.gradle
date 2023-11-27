@@ -61,5 +61,9 @@ dependencies {
     //neumorphism
     implementation 'com.github.fornewid:neumorphism:{latest_version}'
     implementation 'com.github.fornewid:neumorphism:0.2.1'
+    // picker img
+    implementation 'com.github.dhaval2404:imagepicker:2.1'
+    //
+
 
 }

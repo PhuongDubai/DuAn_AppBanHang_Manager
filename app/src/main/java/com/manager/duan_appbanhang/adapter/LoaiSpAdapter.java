@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.manager.duan_appbanhang.R;
 import com.manager.duan_appbanhang.mode.LoaiSp;
+import com.manager.duan_appbanhang.utils.Utils;
 
 import java.util.List;
 
@@ -59,7 +60,10 @@ public class LoaiSpAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) view.getTag();
         }
         viewHolder.textensp.setText(array.get(i).getTensanpham());
-        Glide.with(context).load(array.get(i).getHinhanh()).into(viewHolder.imghinhanh);
+
+      Glide.with(context).load(array.get(i).getHinhanh()).into(viewHolder.imghinhanh);
+
+
         return view;
     }
 }

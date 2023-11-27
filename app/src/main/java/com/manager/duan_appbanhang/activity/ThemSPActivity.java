@@ -1,28 +1,43 @@
 package com.manager.duan_appbanhang.activity;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.manager.duan_appbanhang.R;
 import com.manager.duan_appbanhang.databinding.ActivityThemspBinding;
+import com.manager.duan_appbanhang.mode.MessageModel;
 import com.manager.duan_appbanhang.retrfit.ApiBanHang;
 import com.manager.duan_appbanhang.retrfit.RetrofitClient;
 import com.manager.duan_appbanhang.utils.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ThemSPActivity extends AppCompatActivity {
     Spinner spinner;
@@ -31,6 +46,7 @@ public class ThemSPActivity extends AppCompatActivity {
     ActivityThemspBinding binding;
     ApiBanHang apiBanHang;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
+    String mediaPath;
 
 
     @Override
@@ -44,6 +60,7 @@ public class ThemSPActivity extends AppCompatActivity {
         initView();
         initData();
         ActionToolBar();
+
     }
 
     private void initData() {
@@ -68,9 +85,30 @@ public class ThemSPActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 themsanpham();
+
+            }
+        });
+        binding.imgcamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ImagePicker.with(ThemSPActivity.this)
+                        .crop()
+                        .compress(1024)
+                        .maxResultSize(1080, 1080)
+                        .start();
+
+
             }
         });
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mediaPath = data.getDataString();
+        uploadMultipleFiles();
+        Log.d("log", "onActivityReslut" + mediaPath);
     }
 
     private void themsanpham() {
@@ -87,10 +125,10 @@ public class ThemSPActivity extends AppCompatActivity {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             messageModel -> {
-                                if(messageModel.isSuccess()){
+                                if (messageModel.isSuccess()) {
                                     Toast.makeText(this, messageModel.getMessage(), Toast.LENGTH_SHORT).show();
 
-                                }else {
+                                } else {
                                     Toast.makeText(this, messageModel.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             }, throwable -> {
@@ -98,6 +136,8 @@ public class ThemSPActivity extends AppCompatActivity {
                             }
                     )
             );
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
 
         }
     }
@@ -107,6 +147,7 @@ public class ThemSPActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toobbar_themsp);
 
     }
+
     private void ActionToolBar() {
 
         setSupportActionBar(toolbar);
@@ -115,6 +156,53 @@ public class ThemSPActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 finish();
+            }
+        });
+    }
+
+    private String getPath(Uri uri) {
+        String result;
+        Cursor cursor = getContentResolver().query(uri, null, null, null);
+        if (cursor == null) {
+            result = uri.getPath();
+
+        } else {
+            cursor.moveToFirst();
+            int index  = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(index);
+            cursor.close();
+        }
+        return result;
+    }
+
+
+    private void uploadMultipleFiles() {
+        Uri uri = Uri.parse(mediaPath);
+
+
+        File file = new File(getPath(uri));
+        RequestBody requestBody1 = RequestBody.create(MediaType.parse("*/*"), file);
+        MultipartBody.Part fileToUpload1 = MultipartBody.Part.createFormData("file", file.getName(), requestBody1);
+
+        Call<MessageModel> call = apiBanHang.uploadFile(fileToUpload1);
+        call.enqueue(new Callback<MessageModel>() {
+            @Override
+            public void onResponse(Call<MessageModel> call, Response<MessageModel> response) {
+                MessageModel serverResponse = response.body();
+                if (serverResponse != null) {
+                    if (serverResponse.isSuccess()) {
+                        binding.hinhanh.setText(serverResponse.getName());
+                    } else {
+                        Toast.makeText(getApplicationContext(), serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.v("Response", serverResponse.toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MessageModel> call, Throwable t) {
+                Log.d("log", t.getMessage());
             }
         });
     }

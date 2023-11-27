@@ -51,7 +51,7 @@
             android:id="@+id/imgchitiet"
             android:layout_width="150dp"
             android:layout_height="200dp"
-
+android:layout_marginLeft="10dp"
             android:src="@drawable/media_24" />
 
         <LinearLayout

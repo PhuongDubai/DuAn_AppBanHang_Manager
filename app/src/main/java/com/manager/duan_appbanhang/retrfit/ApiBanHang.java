@@ -7,10 +7,15 @@ import com.manager.duan_appbanhang.mode.SanPhamMoiModel;
 import com.manager.duan_appbanhang.mode.UserModel;
 
 import io.reactivex.rxjava3.core.Observable;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 
 public interface ApiBanHang {
@@ -80,5 +85,10 @@ public interface ApiBanHang {
           @Field("loai") int id
 
   );
+
+  @Multipart
+  @POST("upload.php")
+  Call<MessageModel> uploadFile(@Part MultipartBody.Part file);
+
 
 }
