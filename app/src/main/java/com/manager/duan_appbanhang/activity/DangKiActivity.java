@@ -1,5 +1,6 @@
 package com.manager.duan_appbanhang.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -10,6 +11,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.manager.duan_appbanhang.R;
 import com.manager.duan_appbanhang.retrfit.ApiBanHang;
 import com.manager.duan_appbanhang.retrfit.RetrofitClient;
@@ -23,6 +30,7 @@ public class DangKiActivity extends AppCompatActivity {
     EditText email, pass, repass, mobile, username;
     Button btndangki;
     ApiBanHang apiBanHang;
+    FirebaseAuth firebaseAuth;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
@@ -61,29 +69,22 @@ public class DangKiActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Bạn chưa nhập phone number", Toast.LENGTH_SHORT).show();
         } else {
             if (str_pass.equals(str_repass)) {
-                compositeDisposable.add(apiBanHang.dangKi(str_email, str_pass, str_username, str_mobile)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                userModel -> {
-                                    if(userModel.isSuccess()){
-                                        Utils.user_current.setEmail(str_email);
-                                        Utils.user_current.setPass(str_pass);
-                                        Intent intent = new Intent(getApplicationContext(), DangNhapActivity.class);
-                                        startActivity(intent);
-                                        finish();
-
-                                    }else {
-                                        Toast.makeText(getApplicationContext(), userModel.getMessage(), Toast.LENGTH_SHORT).show();
-
+                firebaseAuth = FirebaseAuth.getInstance();
+                firebaseAuth.createUserWithEmailAndPassword(str_email, str_pass)
+                        .addOnCompleteListener(DangKiActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                                    if (user != null) {
+                                        postData(str_email, str_pass, str_username, str_mobile, user.getUid());
                                     }
-                                },throwable -> {
-                                    Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(DangKiActivity.this, "Email đã tồn tại hoặc không thành công", Toast.LENGTH_SHORT).show();
 
                                 }
-                        )
-                );
-
+                            }
+                        });
 
 
             } else {
@@ -91,6 +92,31 @@ public class DangKiActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    private void postData(String str_email, String str_pass, String str_username, String str_mobile, String uid) {
+        compositeDisposable.add(apiBanHang.dangKi(str_email, str_pass, str_username, str_mobile, uid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            if (userModel.isSuccess()) {
+                                Utils.user_current.setEmail(str_email);
+                                Utils.user_current.setPass(str_pass);
+                                Intent intent = new Intent(getApplicationContext(), DangNhapActivity.class);
+                                startActivity(intent);
+                                finish();
+
+                            } else {
+                                Toast.makeText(getApplicationContext(), userModel.getMessage(), Toast.LENGTH_SHORT).show();
+
+                            }
+                        }, throwable -> {
+                            Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        }
+                )
+        );
     }
 
     private void initView() {

@@ -1,7 +1,5 @@
 package com.manager.duan_appbanhang.mode;
 
-import java.util.List;
-
 public class MessageModel {
     boolean success;
     String message;

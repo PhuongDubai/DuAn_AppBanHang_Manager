@@ -21,6 +21,7 @@ import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.manager.duan_appbanhang.R;
 import com.manager.duan_appbanhang.databinding.ActivityThemspBinding;
 import com.manager.duan_appbanhang.mode.MessageModel;
+import com.manager.duan_appbanhang.mode.SanPhamMoi;
 import com.manager.duan_appbanhang.retrfit.ApiBanHang;
 import com.manager.duan_appbanhang.retrfit.RetrofitClient;
 import com.manager.duan_appbanhang.utils.Utils;
@@ -47,6 +48,8 @@ public class ThemSPActivity extends AppCompatActivity {
     ApiBanHang apiBanHang;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     String mediaPath;
+    SanPhamMoi sanPhamSua;
+    boolean flag = false;
 
 
     @Override
@@ -56,10 +59,29 @@ public class ThemSPActivity extends AppCompatActivity {
         binding = ActivityThemspBinding.inflate(getLayoutInflater());
         apiBanHang = RetrofitClient.getInstance(Utils.BASE_URL).create(ApiBanHang.class);
         setContentView(binding.getRoot());
-
         initView();
         initData();
         ActionToolBar();
+
+        Intent intent = getIntent();
+        sanPhamSua = (SanPhamMoi) intent.getSerializableExtra("sua");
+        if (sanPhamSua == null) {
+            //them
+            flag = false;
+
+        } else {
+            //sua
+            flag = true;
+            binding.btnthem.setText("Sửa sản phẩm");
+            //show data
+            binding.mota.setText(sanPhamSua.getMota());
+            binding.giasp.setText(sanPhamSua.getGiasp()+"");
+            binding.tensp.setText(sanPhamSua.getTensp());
+            binding.hinhanh.setText(sanPhamSua.getHinhanh());
+            binding.spinnerLoai.setSelection(sanPhamSua.getLoai());
+        }
+
+
 
     }
 
@@ -84,7 +106,12 @@ public class ThemSPActivity extends AppCompatActivity {
         binding.btnthem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                themsanpham();
+                if (flag == false){
+                    themsanpham();
+                }else {
+                    suaSanPham();
+                }
+
 
             }
         });
@@ -100,6 +127,37 @@ public class ThemSPActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    private void suaSanPham() {
+        String str_ten = binding.tensp.getText().toString().trim();
+        String str_gia = binding.giasp.getText().toString().trim();
+        String str_hinhanh = binding.hinhanh.getText().toString().trim();
+        String str_mota = binding.mota.getText().toString().trim();
+
+        if (TextUtils.isEmpty(str_ten) || TextUtils.isEmpty(str_gia) || TextUtils.isEmpty(str_hinhanh) || TextUtils.isEmpty(str_mota) || loai == 0) {
+            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin sản phẩm", Toast.LENGTH_SHORT).show();
+        } else {
+            compositeDisposable.add(apiBanHang.updateSp(str_ten, str_gia, str_hinhanh, str_mota, loai,sanPhamSua.getId())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            messageModel -> {
+                                if (messageModel.isSuccess()) {
+                                    Toast.makeText(this, messageModel.getMessage(), Toast.LENGTH_SHORT).show();
+
+                                } else {
+                                    Toast.makeText(this, messageModel.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }, throwable -> {
+                                Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                    )
+            );
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        }
 
     }
 
@@ -168,7 +226,7 @@ public class ThemSPActivity extends AppCompatActivity {
 
         } else {
             cursor.moveToFirst();
-            int index  = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
             result = cursor.getString(index);
             cursor.close();
         }
