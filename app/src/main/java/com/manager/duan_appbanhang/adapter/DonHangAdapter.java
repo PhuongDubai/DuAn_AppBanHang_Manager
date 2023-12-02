@@ -11,8 +11,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.manager.duan_appbanhang.Interface.ItemClickListener;
 import com.manager.duan_appbanhang.R;
 import com.manager.duan_appbanhang.mode.DonHang;
+import com.manager.duan_appbanhang.mode.EventBus.DonHangEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -38,6 +42,7 @@ public class DonHangAdapter extends RecyclerView.Adapter<DonHangAdapter.MyViewHo
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         DonHang donHang = listDonhang.get(position);
         holder.txtDonhang.setText("Đơn hàng: " + donHang.getId());
+        holder.diachi.setText("Địa chỉ:"+donHang.getDiachi());
         holder.trangthai.setText(trangThaiDon(donHang.getTrangthai()));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(
@@ -51,6 +56,15 @@ public class DonHangAdapter extends RecyclerView.Adapter<DonHangAdapter.MyViewHo
         holder.reChitiet.setLayoutManager(layoutManager);
         holder.reChitiet.setAdapter(chitietAdapter);
         holder.reChitiet.setRecycledViewPool(viewPool);
+        holder.setListener(new ItemClickListener() {
+            @Override
+            public void onClick(View view, int pos, boolean isLongClick) {
+                if(isLongClick){
+                    EventBus.getDefault().postSticky(new DonHangEvent(donHang));
+                }
+            }
+        });
+
 
 
     }
@@ -82,15 +96,29 @@ public class DonHangAdapter extends RecyclerView.Adapter<DonHangAdapter.MyViewHo
         return listDonhang.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView txtDonhang, trangthai;
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
+        TextView txtDonhang, trangthai,diachi;
         RecyclerView reChitiet;
+        ItemClickListener listener;
+
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             txtDonhang = itemView.findViewById(R.id.idDonhang);
             trangthai = itemView.findViewById(R.id.tinhtrang);
+            diachi = itemView.findViewById(R.id.diachi_donhang);
             reChitiet = itemView.findViewById(R.id.recycleview_chitiet);
+            itemView.setOnLongClickListener(this);
+        }
+
+        public void setListener(ItemClickListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            listener.onClick(view,getAdapterPosition(),true);
+            return false;
         }
     }
 }

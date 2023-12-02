@@ -4,6 +4,7 @@ import com.manager.duan_appbanhang.mode.DonHangModel;
 import com.manager.duan_appbanhang.mode.LoaiSpModel;
 import com.manager.duan_appbanhang.mode.MessageModel;
 import com.manager.duan_appbanhang.mode.SanPhamMoiModel;
+import com.manager.duan_appbanhang.mode.ThongKeModel;
 import com.manager.duan_appbanhang.mode.UserModel;
 
 import io.reactivex.rxjava3.core.Observable;
@@ -24,6 +25,9 @@ public interface ApiBanHang {
 
   @GET("getspmoi.php")
   Observable<SanPhamMoiModel> getSpMoi();
+
+  @GET("thongke.php")
+  Observable<ThongKeModel> getthongke();
 
 
   @POST("chitiet.php")
@@ -103,6 +107,13 @@ public interface ApiBanHang {
           @Field("id") int id
 
   );
+  @POST("gettoken.php")
+  @FormUrlEncoded
+  Observable<UserModel> gettoken(
+          @Field("status") int status,
+          @Field("iduser") int iduser
+
+  );
   @POST("updatetoken.php")
   @FormUrlEncoded
   Observable<MessageModel> updateToken(
@@ -110,6 +121,13 @@ public interface ApiBanHang {
           @Field("token") String token
 
 
+  );
+
+  @POST("updateorder.php")
+  @FormUrlEncoded
+  Observable<MessageModel> updateOrder(
+          @Field("id") int id,
+          @Field("trangthai") int trangthai
   );
 
   @Multipart

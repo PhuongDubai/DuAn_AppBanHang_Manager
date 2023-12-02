@@ -1,18 +1,40 @@
 package com.manager.duan_appbanhang.activity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.manager.duan_appbanhang.R;
 import com.manager.duan_appbanhang.adapter.DonHangAdapter;
+import com.manager.duan_appbanhang.mode.DonHang;
+import com.manager.duan_appbanhang.mode.EventBus.DonHangEvent;
+import com.manager.duan_appbanhang.mode.NotiSendData;
 import com.manager.duan_appbanhang.retrfit.ApiBanHang;
+import com.manager.duan_appbanhang.retrfit.ApiPushNotification;
 import com.manager.duan_appbanhang.retrfit.RetrofitClient;
+import com.manager.duan_appbanhang.retrfit.RetrofitClientNoti;
 import com.manager.duan_appbanhang.utils.Utils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -23,6 +45,9 @@ public class XemDonActivity extends AppCompatActivity {
     ApiBanHang apiBanHang;
     RecyclerView redonhang;
     Toolbar toolbar;
+    DonHang donHang;
+    int tinhtrang;
+    AlertDialog dialog;
 
 
     @Override
@@ -35,6 +60,7 @@ public class XemDonActivity extends AppCompatActivity {
 
 
     }
+
 
     private void getOrder() {
         compositeDisposable.add(apiBanHang.xemDonHang(0)
@@ -75,5 +101,130 @@ public class XemDonActivity extends AppCompatActivity {
     protected void onDestroy() {
         compositeDisposable.clear();
         super.onDestroy();
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void evenDonHang(DonHangEvent event) {
+        if (event != null) {
+            donHang = event.getDonHang();
+            showCustomDialog();
+        }
+
+    }
+
+    private void showCustomDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_donhang, null);
+        Spinner spinner = view.findViewById(R.id.spinner_dialog);
+        AppCompatButton btndongy = view.findViewById(R.id.dongy_dialog);
+        List<String> list = new ArrayList<>();
+        list.add("Đơn hàng đang được xử lí");
+        list.add("Đơn hàng đã được xác nhận");
+        list.add("Đơn hàng đã được giao cho đơn vị vận chuyển");
+        list.add("Thành công");
+        list.add("Đơn hàng đã hủy");
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, list);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(donHang.getTrangthai());
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                tinhtrang = i;
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        btndongy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                capNhapDonHang();
+
+
+            }
+        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(view);
+        dialog = builder.create();
+        dialog.show();
+
+    }
+
+
+    private void capNhapDonHang() {
+        compositeDisposable.add(apiBanHang.updateOrder(donHang.getId(), tinhtrang)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        messageModel -> {
+                            getOrder();
+                            pushNotiToUser();
+                            dialog.dismiss();
+                        }, throwable -> {
+
+                        }
+                ));
+    }
+    private void pushNotiToUser() {
+        //gettoken
+        compositeDisposable.add(apiBanHang.gettoken(0,donHang.getIduser())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(userModel -> {
+            if (userModel.isSuccess()) {
+                for (int i =0; i < userModel.getResult().size();i++){
+                    Map<String, String> data = new HashMap<>();
+                    data.put("title", "Thông báo");
+                    data.put("body", trangThaiDon(tinhtrang));
+                    NotiSendData notiSendData = new NotiSendData(userModel.getResult().get(i).getToken(), data);
+                    ApiPushNotification apiPushNotification = RetrofitClientNoti.getInstance().create(ApiPushNotification.class);
+                    compositeDisposable.add(apiPushNotification.sendNotification(notiSendData).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(notiResponse -> {
+
+                    }, throwable -> {
+                        Log.d("logg", throwable.getMessage());
+                    }));
+                }
+
+            }
+
+        }, throwable -> {
+            Log.d("loggg", throwable.getMessage());
+        }));
+
+
+    }
+    private String trangThaiDon(int status) {
+        String result  = "";
+        switch (status){
+            case 0 :
+                result = "Đơn hàng đang được xử lí";
+                break;
+            case 1 :
+                result = "Đơn hàng đã được xác nhận";
+                break;
+            case 2 :
+                result = "Đơn hàng đã được giao cho đơn vị vận chuyển";
+                break;
+            case 3:
+                result = "Đơn hàng đã được giao thành công";
+                break;
+            case 4:
+                result = "Đơn hàng đã hủy";
+                break;
+        }
+        return  result;
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }

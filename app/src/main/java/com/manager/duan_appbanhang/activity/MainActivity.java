@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
+
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Firebase;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         apiBanHang = RetrofitClient.getInstance(Utils.BASE_URL).create(ApiBanHang.class);
 
         Paper.init(this);
-        if (Paper.book().read("user")!= null){
+        if (Paper.book().read("user") != null) {
             User user = Paper.book().read("user");
             Utils.user_current = user;
 
@@ -105,29 +106,35 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 1:
                         Intent dienthoai = new Intent(getApplicationContext(), DienThoaiActivity.class);
-                        dienthoai.putExtra("loai",1);
-                         startActivity(dienthoai);
+                        dienthoai.putExtra("loai", 1);
+                        startActivity(dienthoai);
                         break;
                     case 2:
                         Intent laptop = new Intent(getApplicationContext(), DienThoaiActivity.class);
-                        laptop.putExtra("loai",2);
+                        laptop.putExtra("loai", 2);
                         startActivity(laptop);
                         break;
-                    case 5:
+                    case 3:
                         Intent donhang = new Intent(getApplicationContext(), XemDonActivity.class);
                         startActivity(donhang);
                         break;
-                    case 6:
-                        Intent quanly = new Intent(getApplicationContext(), QuanLyActivity.class);
-                        startActivity(quanly);
-                        break;
-                    case 7:
+                    case 4:
                         Paper.book().delete("user");
                         FirebaseAuth.getInstance().signOut();
                         Intent dangxuat = new Intent(getApplicationContext(), DangNhapActivity.class);
                         startActivity(dangxuat);
                         finish();
                         break;
+                    case 5:
+                        Intent thongke = new Intent(getApplicationContext(), ThongKeActivity.class);
+                        startActivity(thongke);
+                        break;
+
+                    case 6:
+                        Intent quanly = new Intent(getApplicationContext(), QuanLyActivity.class);
+                        startActivity(quanly);
+                        break;
+
                 }
             }
         });
@@ -152,20 +159,21 @@ public class MainActivity extends AppCompatActivity {
                         }
                 ));
     }
-    private  void getToken(){
+
+    private void getToken() {
         FirebaseMessaging.getInstance().getToken()
                 .addOnSuccessListener(new OnSuccessListener<String>() {
                     @Override
                     public void onSuccess(String s) {
-                        if(!TextUtils.isEmpty(s)){
-                            compositeDisposable.add(apiBanHang.updateToken(Utils.user_current.getId(),s)
+                        if (!TextUtils.isEmpty(s)) {
+                            compositeDisposable.add(apiBanHang.updateToken(Utils.user_current.getId(), s)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(
                                             messageModel -> {
 
-                                            },throwable -> {
-                                                Log.d("log",throwable.getMessage());
+                                            }, throwable -> {
+                                                Log.d("log", throwable.getMessage());
 
                                             }
                                     ));
@@ -184,7 +192,8 @@ public class MainActivity extends AppCompatActivity {
                         loaiSpModel -> {
                             if (loaiSpModel.isSuccess()) {
                                 mangloaisp = loaiSpModel.getResult();
-
+                                mangloaisp.add(new LoaiSp("Thống kê","https://png.pngtree.com/png-vector/20190916/ourlarge/pngtree-info-icon-for-your-project-png-image_1731084.jpg"));
+                                mangloaisp.add(new LoaiSp("Quản lý","https://baolanhdinhcu.net/wp-content/uploads/2017/11/the-xanh-my-tam-the-van-nang-4.png"));
                                 loaiSpAdapter = new LoaiSpAdapter(getApplicationContext(), mangloaisp);
                                 listViewManHinhChinh.setAdapter(loaiSpAdapter);
                             }
@@ -212,9 +221,9 @@ public class MainActivity extends AppCompatActivity {
         // khoi tao list
         mangloaisp = new ArrayList<>();
         mangSpMoi = new ArrayList<>();
-        if (Utils.manggiohang == null){
+        if (Utils.manggiohang == null) {
             Utils.manggiohang = new ArrayList<>();
-        }else {
+        } else {
             int totalItem = 0;
             for (int i = 0; i < Utils.manggiohang.size(); i++) {
                 totalItem = totalItem + Utils.manggiohang.get(i).getSoluong();
